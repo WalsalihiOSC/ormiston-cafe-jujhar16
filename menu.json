@@ -1,0 +1,14 @@
+{
+    "Burgers": {
+        "Chicken Burger": {
+            "description": "*Cluck*",
+            "price": 4.50
+        }
+    },
+    "Wraps": {
+        "Butter Chicken": {
+            "description": "*Muffled cluck*",
+            "price": 5.50
+        }
+    }
+}
