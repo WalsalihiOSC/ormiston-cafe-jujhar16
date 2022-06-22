@@ -1,8 +1,14 @@
 import json
 import tkinter as tk
 
+from widgets import MenuWidget
+
+MENU_COLUMN_COUNT = 5
+# TODO: move to json file
+DEFAULT_TAB = "Burgers"
+
 class CafeInterface:
-    def __init__(self, parent, menu):
+    def __init__(self, parent):
         root_frame = tk.Frame(parent)
         root_frame.grid(row=0, column=0, sticky='news')
         root_frame.grid_rowconfigure(0, weight=1)
@@ -17,6 +23,9 @@ class CafeInterface:
 
         tab_frame = tk.Frame(content_frame, bg="blue")
         tab_frame.grid(row=0, column=0, sticky="news")
+
+        menu = MenuWidget(content_frame, file_path="./menu.json", column_count=MENU_COLUMN_COUNT, selected_tab=DEFAULT_TAB)
+        menu.grid(row=1, column=0, sticky="news")
         
         sidebar_frame = tk.Frame(root_frame, bg="gray")
         sidebar_frame.grid(row=0, column=1, sticky='news')
