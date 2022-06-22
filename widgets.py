@@ -3,10 +3,11 @@ from tkinter import Frame, Label
 
 class MenuWidget(Frame):
     # TODO: should this take a json object, file object or string instead?
-    def __init__(self, parent, file_path, column_count, selected_tab):
+    def __init__(self, parent, file_path, column_count, selected_tab, on_item_click):
         Frame.__init__(self, parent)
         self.selected_tab = selected_tab
         self.column_count = column_count
+        self.on_item_click = on_item_click
 
         try:
             with open(file_path) as file:
@@ -33,20 +34,38 @@ class MenuWidget(Frame):
         for child in self.winfo_children():
             child.destroy()
         for index, (item_name, item_info) in enumerate(self.data[self.selected_tab].items()):
-            item_frame = Frame(self, highlightbackground="gray", highlightthickness=2)
+            item_row = int(index/self.column_count)
+            item_column = int(index%self.column_count)
+
+            item_frame = Frame(self, highlightbackground="gray", highlightthickness=2, background="white")
+            def on_enter(item_frame):
+                item_frame["background"] = "lightgray"
+                for child in item_frame.winfo_children():
+                    if isinstance(child, Label):
+                        child["background"] = "lightgray"
+            def on_leave(item_frame):
+                item_frame["background"] = "white"
+                for child in item_frame.winfo_children():
+                    if isinstance(child, Label):
+                        child["background"] = "white"
+            # Python doesnt close registers passed to closures :/
+            # So to copy by value, we capture variables by passing them as default arguments
+            item_frame.bind("<Enter>", lambda _, item_frame=item_frame: on_enter(item_frame))
+            item_frame.bind("<Leave>", lambda _, item_frame=item_frame: on_leave(item_frame))
+            item_frame.bind('<Button-1>', lambda _, item_name=item_name, item_info=item_info: self.on_item_click(item_name, item_info))
             item_frame.grid_columnconfigure(0, weight=1)
-            item_frame.grid_rowconfigure(0, weight=0)
-            item_frame.grid_rowconfigure(1, weight=0)
-            item_frame.grid(row=int(index/self.column_count), column=int(index%self.column_count),
-                sticky="news", padx=5, pady=5)
+            item_frame.grid(row=item_row, column=item_column,
+                sticky="news",
+                # TODO: scale padding
+                padx=5, pady=5)
 
             placeholder_frame = Frame(item_frame, background="gray", height=60)
-            placeholder_frame.grid(row=0, column=0, sticky="news", padx=5, pady=5)
+            placeholder_frame.grid(row=0, column=0, sticky="news", padx=5, pady=(5, 0))
 
-            name_label = WrappingLabel(item_frame, text=item_name)
-            name_label.grid(row=1, column=0, sticky="news")
+            name_label = WrappingLabel(item_frame, text=item_name, background="white")
+            name_label.grid(row=1, column=0, sticky="news", padx=5)
 
-# https://stackoverflow.com/questions/62485520/how-to-wrap-the-text-in-a-tkinter-label-dynamically
+# from https://stackoverflow.com/questions/62485520/how-to-wrap-the-text-in-a-tkinter-label-dynamically
 class WrappingLabel(Label):
     '''a type of Label that automatically adjusts the wrap to the size'''
     def __init__(self, master=None, **kwargs):
