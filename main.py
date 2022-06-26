@@ -52,7 +52,9 @@ class CafeInterface:
             # Python doesnt close registers passed to closures :/
             # So to copy by value, we capture variables by passing them as default arguments
             def on_click(category_frame, category_name):
-                if category_frame.entered:
+                # we don't want to call update if the tab is already selected,
+                # as it flickers when updating
+                if category_frame.entered and menu.selected_tab != category_name:
                     menu.selected_tab = category_name
                     menu.update()
             def on_enter(category_frame):
@@ -67,7 +69,7 @@ class CafeInterface:
             category_frame.grid_columnconfigure(0, weight=1)
             category_frame.grid(row=0, column=index, sticky="news", padx=(5, 0), pady=5)
 
-            category_label = tk.Label(category_frame, text=category_name)
+            category_label = tk.Label(category_frame, text=category_name.title())
             category_label.grid(row=0, column=0, sticky="news")
         
         sidebar_frame = tk.Frame(root_frame, background="lightgray")
@@ -81,8 +83,8 @@ class CafeInterface:
 
         header_font = tk.font.nametofont("TkDefaultFont").copy()
         header_font["size"] = 20
-        tk.Label(sidebar_header_frame, text="Order:", background="lightgray",
-            font=header_font).grid(row=0, column=0, padx=5, pady=5, sticky="nsw")
+        tk.Label(sidebar_header_frame, text="ORDER", background="lightgray",
+            font=header_font).grid(row=0, column=0, padx=(10, 0), pady=5, sticky="nsw")
 
         clear_button_frame = tk.Frame(sidebar_header_frame, highlightbackground="black", highlightthickness=1)
         clear_button_frame.grid_rowconfigure(0, weight=1)
@@ -154,7 +156,7 @@ class CafeInterface:
             item_label = tk.Label(item_frame, text=name, background=color)
             item_label.grid(row=0, column=0, sticky="nws")
             item_quantity_label = tk.Label(item_frame, text="1", background=color)
-            item_quantity_label.grid(row=0, column=1, sticky="nws")
+            item_quantity_label.grid(row=0, column=1, sticky="e")
             self.order_items[name] = item_quantity_label
         
 
