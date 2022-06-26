@@ -1,5 +1,6 @@
 import json
 import tkinter as tk
+import tkinter.font
 
 from widgets import MenuWidget
 
@@ -12,7 +13,7 @@ class CafeInterface:
         root_frame = tk.Frame(root)
         root_frame.grid_rowconfigure(0, weight=1)
         root_frame.grid_columnconfigure(0, weight=2)
-        root_frame.grid_columnconfigure(1, weight=1, minsize=200)
+        root_frame.grid_columnconfigure(1, minsize=300)
         root_frame.grid(row=0, column=0, sticky='news')
 
         content_frame = tk.Frame(root_frame)
@@ -28,7 +29,7 @@ class CafeInterface:
 
         menu = MenuWidget(content_frame, file_path="./menu.json",
             column_count=MENU_COLUMN_COUNT, selected_tab=DEFAULT_TAB,
-            on_item_click=print)
+            on_item_click=lambda name, info: self.add_to_order(name, info), root=root)
         menu.grid(row=1, column=0, sticky="news")
 
         for index, category_name in enumerate(menu.data.keys()):
@@ -56,8 +57,17 @@ class CafeInterface:
             category_label = tk.Label(category_frame, text=category_name)
             category_label.grid(row=0, column=0, sticky="news")
         
-        sidebar_frame = tk.Frame(root_frame, bg="gray")
-        sidebar_frame.grid(row=0, column=1, sticky='news')
+        self.sidebar_frame = tk.Frame(root_frame, background="lightgray")
+        self.sidebar_frame.grid_columnconfigure(0, weight=1)
+        self.sidebar_frame.grid(row=0, column=1, sticky='news')
+        font = tk.font.nametofont("TkDefaultFont").copy()
+        font["size"] = 20
+        tk.Label(self.sidebar_frame, text="Order:", background="lightgray", font=font).grid(padx=5, pady=5, sticky="nsw")
+
+    def add_to_order(self, name, info):
+        item_label = tk.Label(self.sidebar_frame, text=name)
+        item_label.grid(sticky="nsw")
+        
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -65,5 +75,6 @@ if __name__ == '__main__':
     root.title("Cafe Interface")
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
+
     CafeInterface(root)
     root.mainloop()
