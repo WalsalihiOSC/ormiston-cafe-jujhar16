@@ -1,0 +1,38 @@
+{
+    "Burgers": {
+        "Chicken Burger": {
+            "description": "*Cluck*",
+            "price": 4.50
+        },
+        "Test Burger": {
+            "description": "*Cluck*",
+            "price": 4.50
+        },
+        "Another Test Burger": {
+            "description": "*Cluck*",
+            "price": 4.50
+        },
+        "More Test Burger": {
+            "description": "*Cluck*",
+            "price": 4.50
+        },
+        "Test Burger!": {
+            "description": "*Cluck*",
+            "price": 4.50
+        },
+        "Another Test Burger!": {
+            "description": "*Cluck*",
+            "price": 4.50
+        },
+        "More Test Burger!": {
+            "description": "*Cluck*",
+            "price": 4.50
+        }
+    },
+    "Wraps": {
+        "Butter Chicken": {
+            "description": "*Muffled cluck*",
+            "price": 5.50
+        }
+    }
+}
