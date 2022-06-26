@@ -1,6 +1,10 @@
 import json
 from tkinter import Frame, Label
 
+DATA_LOAD_FAILURE_MSG = \
+"""Failed to load menu.
+Please make sure `menu.json` is in the same folder as `main.py`."""
+
 class MenuWidget(Frame):
     # TODO: should this take a json object, file object or string instead?
     def __init__(self, parent, file_path, column_count, selected_tab, on_item_click):
@@ -20,7 +24,7 @@ class MenuWidget(Frame):
         if self.data == None:
             self.grid_rowconfigure(0, weight=1)
             self.grid_columnconfigure(0, weight=1)
-            Label(self, text="failed to load menu").grid(sticky="news")
+            Label(self, text=DATA_LOAD_FAILURE_MSG).grid(sticky="news")
             return
         
         # make menu items auto-size and uniform in width
