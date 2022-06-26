@@ -3,12 +3,11 @@ from tkinter import Frame, Label
 
 class MenuWidget(Frame):
     # TODO: should this take a json object, file object or string instead?
-    def __init__(self, parent, file_path, column_count, selected_tab, on_item_click, root):
+    def __init__(self, parent, file_path, column_count, selected_tab, on_item_click):
         Frame.__init__(self, parent)
         self.selected_tab = selected_tab
         self.column_count = column_count
         self.on_item_click = on_item_click
-        self.root = root
 
         try:
             with open(file_path) as file:
@@ -59,7 +58,7 @@ class MenuWidget(Frame):
             # So to copy by value, we capture variables by passing them as default arguments
             item_frame.bind("<Enter>", lambda _, item_frame=item_frame: on_enter(item_frame))
             item_frame.bind("<Leave>", lambda _, item_frame=item_frame: on_leave(item_frame))
-            self.root.bind('<Button-1>',
+            item_frame.bind_all('<Button-1>',
                 lambda _, item_frame=item_frame, item_name=item_name, item_info=item_info:
                     on_click(item_frame, item_name, item_info), add="+")
             item_frame.grid_columnconfigure(0, weight=1)

@@ -41,7 +41,7 @@ class CafeInterface:
 
         menu = MenuWidget(content_frame, file_path="./menu.json",
             column_count=MENU_COLUMN_COUNT, selected_tab=DEFAULT_TAB,
-            on_item_click=lambda name, info: self.add_to_order(name, info), root=root)
+            on_item_click=lambda name, info: self.add_to_order(name, info))
         menu.grid(row=1, column=0, sticky="news")
 
         for index, category_name in enumerate(menu.data.keys()):
@@ -61,7 +61,7 @@ class CafeInterface:
                 category_frame.entered = False
             category_frame.bind("<Enter>", lambda _, category_frame=category_frame: on_enter(category_frame))
             category_frame.bind("<Leave>", lambda _, category_frame=category_frame: on_leave(category_frame))
-            root.bind('<Button-1>', lambda _, category_frame=category_frame,
+            category_frame.bind_all('<Button-1>', lambda _, category_frame=category_frame,
                 category_name=category_name: on_click(category_frame, category_name), add="+")
             category_frame.grid_rowconfigure(0, weight=1)
             category_frame.grid_columnconfigure(0, weight=1)
@@ -70,13 +70,76 @@ class CafeInterface:
             category_label = tk.Label(category_frame, text=category_name)
             category_label.grid(row=0, column=0, sticky="news")
         
-        self.sidebar_frame = tk.Frame(root_frame, background="lightgray")
-        self.sidebar_frame.grid_columnconfigure(0, weight=1)
-        self.sidebar_frame.grid(row=0, column=1, sticky='news')
-        font = tk.font.nametofont("TkDefaultFont").copy()
-        font["size"] = 20
-        tk.Label(self.sidebar_frame, text="Order:", background="lightgray",
-            font=font).grid(padx=5, pady=5, sticky="nsw")
+        sidebar_frame = tk.Frame(root_frame, background="lightgray")
+        sidebar_frame.grid_columnconfigure(0, weight=1)
+        sidebar_frame.grid_rowconfigure(1, weight=1)
+        sidebar_frame.grid(row=0, column=1, sticky='news')
+
+        sidebar_header_frame = tk.Frame(sidebar_frame, background="lightgray")
+        sidebar_header_frame.grid_columnconfigure(0, weight=1)
+        sidebar_header_frame.grid(row=0, column=0, sticky="news")
+
+        header_font = tk.font.nametofont("TkDefaultFont").copy()
+        header_font["size"] = 20
+        tk.Label(sidebar_header_frame, text="Order:", background="lightgray",
+            font=header_font).grid(row=0, column=0, padx=5, pady=5, sticky="nsw")
+
+        clear_button_frame = tk.Frame(sidebar_header_frame, highlightbackground="black", highlightthickness=1)
+        clear_button_frame.grid_rowconfigure(0, weight=1)
+        clear_button_frame.grid_columnconfigure(0, weight=1)
+        clear_button_frame.grid(row=0, column=1, sticky="news", padx=10, pady=10)
+        tk.Label(clear_button_frame, text="CLEAR").grid(row=0, column=0)
+
+        order_list_frame = tk.Frame(sidebar_frame, background="lightgray")
+        order_list_frame.grid_columnconfigure(0, weight=1)
+        order_list_frame.grid_rowconfigure(0, weight=1)
+        order_list_frame.grid(row=1, column=0, sticky="news")
+
+        canvas = tk.Canvas(order_list_frame, background="lightgray", highlightthickness=0)
+        # TODO: theme the scrollbar,
+        # see: https://stackoverflow.com/questions/28375591/changing-the-appearance-of-a-scrollbar-in-tkinter-using-ttk-styles
+        scrollbar = tk.Scrollbar(order_list_frame, orient="vertical", command=canvas.yview)
+        scrollbar.grid(row=0, column=1, sticky="news")
+
+        self.order_list_frame = tk.Frame(
+            #sidebar_frame
+            canvas, background="lightgray")
+        self.order_list_frame.grid_columnconfigure(0, weight=1)
+        # self.order_list_frame.grid(row=1, column=0, sticky='news')
+        self.order_list_frame.bind(
+            "<Configure>",
+            lambda _: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.entered = False
+        # these functions cant be named "on_enter", etc. because that will result in them
+        # overriding the previous definition for categories :(
+        def c_on_enter(_):
+            canvas.entered = True
+        def c_on_leave(_):
+            canvas.entered = False
+        canvas.bind("<Enter>", c_on_enter)
+        canvas.bind("<Leave>", c_on_leave)
+        # TODO: this only works on macos, for windows & linux support,
+        # see: https://stackoverflow.com/questions/17355902/tkinter-binding-mousewheel-to-scrollbar
+        def on_scroll(event):
+            if canvas.entered:
+                canvas.yview_scroll(-event.delta, "units")
+        canvas.bind_all("<MouseWheel>", on_scroll)
+        frame_id = canvas.create_window((0, 0), window=self.order_list_frame, anchor="nw")
+        canvas.bind("<Configure>", lambda e: canvas.itemconfig(frame_id, width=e.width))
+        canvas["yscrollcommand"] = scrollbar.set
+        canvas.grid(row=0, column=0, sticky="news")
+
+        checkout_button_frame = tk.Frame(sidebar_frame, highlightbackground="black", highlightthickness=1)
+        checkout_button_frame.grid_rowconfigure(0, weight=1)
+        checkout_button_frame.grid_columnconfigure(0, weight=1)
+        checkout_button_frame.grid(row=3, column=0, sticky="news", padx=10, pady=10)
+        tk.Label(checkout_button_frame, text="CHECKOUT", font=header_font).grid(row=0, column=0)
+
+
 
     def add_to_order(self, name, info):
         item_quantity_label = self.order_items.get(name)
@@ -84,12 +147,12 @@ class CafeInterface:
             item_quantity_label["text"] = int(item_quantity_label["text"]) + 1
         else:
             color = COLORS[self.color_counter]
-            item_frame = tk.Frame(self.sidebar_frame, background=color)
+            item_frame = tk.Frame(self.order_list_frame, background=color)
             self.color_counter += 1
             if self.color_counter == len(COLORS):
                 self.color_counter = 0
             item_frame.grid_columnconfigure(0, weight=1)
-            item_frame.grid(sticky="news", pady=(0, 5))
+            item_frame.grid(sticky="news", pady=(0, 5), padx=5)
             item_label = tk.Label(item_frame, text=name, background=color)
             item_label.grid(row=0, column=0, sticky="nws")
             item_quantity_label = tk.Label(item_frame, text="1", background=color)
