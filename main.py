@@ -8,9 +8,19 @@ MENU_COLUMN_COUNT = 5
 # TODO: move to json file
 DEFAULT_TAB = "Burgers"
 
+COLORS = [
+    "#e3e3ff",
+    "#dff2fd",
+    "#e2fce6",
+    "#fcfade",
+    "#ffeee2",
+    "#ffdbdb",
+]
+
 class CafeInterface:
     def __init__(self, root):
         self.order_items = {}
+        self.color_counter = 0
 
         root_frame = tk.Frame(root)
         root_frame.grid_rowconfigure(0, weight=1)
@@ -73,12 +83,16 @@ class CafeInterface:
         if item_quantity_label != None:
             item_quantity_label["text"] = int(item_quantity_label["text"]) + 1
         else:
-            item_frame = tk.Frame(self.sidebar_frame)
+            color = COLORS[self.color_counter]
+            item_frame = tk.Frame(self.sidebar_frame, background=color)
+            self.color_counter += 1
+            if self.color_counter == len(COLORS):
+                self.color_counter = 0
             item_frame.grid_columnconfigure(0, weight=1)
-            item_frame.grid(sticky="news")
-            item_label = tk.Label(item_frame, text=name)
+            item_frame.grid(sticky="news", pady=(0, 5))
+            item_label = tk.Label(item_frame, text=name, background=color)
             item_label.grid(row=0, column=0, sticky="nws")
-            item_quantity_label = tk.Label(item_frame, text="1")
+            item_quantity_label = tk.Label(item_frame, text="1", background=color)
             item_quantity_label.grid(row=0, column=1, sticky="nws")
             self.order_items[name] = item_quantity_label
         
