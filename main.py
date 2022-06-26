@@ -9,13 +9,18 @@ MENU_COLUMN_COUNT = 5
 DEFAULT_TAB = "Burgers"
 
 COLORS = [
-    "#e3e3ff",
-    "#dff2fd",
-    "#e2fce6",
-    "#fcfade",
-    "#ffeee2",
-    "#ffdbdb",
+    "#EBEAEA",
+    "#FBFAFA",
 ]
+# rainbow
+# COLORS = [
+#     "#e3e3ff",
+#     "#dff2fd",
+#     "#e2fce6",
+#     "#fcfade",
+#     "#ffeee2",
+#     "#ffdbdb",
+# ]
 
 class CafeInterface:
     def __init__(self, root):
@@ -34,15 +39,20 @@ class CafeInterface:
         content_frame.grid_columnconfigure(0, weight=1)
         content_frame.grid(row=0, column=0, sticky='news')
 
-        # TODO: move tabs to their own widget
-        tab_frame = tk.Frame(content_frame, highlightbackground="black", highlightthickness=1)
-        tab_frame.grid_rowconfigure(0, weight=1)
-        tab_frame.grid(row=0, column=0, sticky="news", padx=5, pady=5)
-
+        # We create the menu widget before tabs in case the data fails to load
         menu = MenuWidget(content_frame, file_path="./menu.json",
             column_count=MENU_COLUMN_COUNT, selected_tab=DEFAULT_TAB,
             on_item_click=lambda name, info: self.add_to_order(name, info))
         menu.grid(row=1, column=0, sticky="news")
+        if menu.data == None:
+            root_frame.grid_columnconfigure(1, minsize=0)
+            content_frame.grid_rowconfigure(0, minsize=0)
+            return
+
+        # TODO: move tabs to their own widget
+        tab_frame = tk.Frame(content_frame, highlightbackground="black", highlightthickness=1)
+        tab_frame.grid_rowconfigure(0, weight=1)
+        tab_frame.grid(row=0, column=0, sticky="news", padx=5, pady=5)
 
         for index, category_name in enumerate(menu.data.keys()):
             tab_frame.grid_columnconfigure(index, uniform="tab")
@@ -141,6 +151,7 @@ class CafeInterface:
         checkout_button_frame.grid(row=3, column=0, sticky="news", padx=10, pady=10)
         tk.Label(checkout_button_frame, text="CHECKOUT", font=header_font).grid(row=0, column=0)
 
+    # TODO: sort order items alphabetically
     def add_to_order(self, name, info):
         item_quantity_label = self.order_items.get(name)
         if item_quantity_label != None:
@@ -154,9 +165,11 @@ class CafeInterface:
             item_frame.grid_columnconfigure(0, weight=1)
             item_frame.grid(sticky="news")
             item_label = tk.Label(item_frame, text=name, background=color)
-            item_label.grid(row=0, column=0, sticky="nws")
+            item_label.grid(row=0, column=0, sticky="w")
+            tk.Label(item_frame, text=info["description"], background=color).grid(row=0, column=1, sticky="e")
+            tk.Label(item_frame, text="${:,.2f}".format(info["price"]), background=color).grid(row=1, column=0, sticky="w")
             item_quantity_label = tk.Label(item_frame, text="1", background=color)
-            item_quantity_label.grid(row=0, column=1, sticky="e")
+            item_quantity_label.grid(row=1, column=1, sticky="e")
             self.order_items[name] = item_quantity_label
         
 
