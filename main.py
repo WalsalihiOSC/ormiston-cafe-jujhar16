@@ -10,6 +10,8 @@ DEFAULT_TAB = "Burgers"
 
 class CafeInterface:
     def __init__(self, root):
+        self.order_items = {}
+
         root_frame = tk.Frame(root)
         root_frame.grid_rowconfigure(0, weight=1)
         root_frame.grid_columnconfigure(0, weight=2)
@@ -49,7 +51,8 @@ class CafeInterface:
                 category_frame.entered = False
             category_frame.bind("<Enter>", lambda _, category_frame=category_frame: on_enter(category_frame))
             category_frame.bind("<Leave>", lambda _, category_frame=category_frame: on_leave(category_frame))
-            root.bind('<Button-1>', lambda _, category_frame=category_frame, category_name=category_name: on_click(category_frame, category_name), add="+")
+            root.bind('<Button-1>', lambda _, category_frame=category_frame,
+                category_name=category_name: on_click(category_frame, category_name), add="+")
             category_frame.grid_rowconfigure(0, weight=1)
             category_frame.grid_columnconfigure(0, weight=1)
             category_frame.grid(row=0, column=index, sticky="news", padx=(5, 0), pady=5)
@@ -62,11 +65,22 @@ class CafeInterface:
         self.sidebar_frame.grid(row=0, column=1, sticky='news')
         font = tk.font.nametofont("TkDefaultFont").copy()
         font["size"] = 20
-        tk.Label(self.sidebar_frame, text="Order:", background="lightgray", font=font).grid(padx=5, pady=5, sticky="nsw")
+        tk.Label(self.sidebar_frame, text="Order:", background="lightgray",
+            font=font).grid(padx=5, pady=5, sticky="nsw")
 
     def add_to_order(self, name, info):
-        item_label = tk.Label(self.sidebar_frame, text=name)
-        item_label.grid(sticky="nsw")
+        item_quantity_label = self.order_items.get(name)
+        if item_quantity_label != None:
+            item_quantity_label["text"] = int(item_quantity_label["text"]) + 1
+        else:
+            item_frame = tk.Frame(self.sidebar_frame)
+            item_frame.grid_columnconfigure(0, weight=1)
+            item_frame.grid(sticky="news")
+            item_label = tk.Label(item_frame, text=name)
+            item_label.grid(row=0, column=0, sticky="nws")
+            item_quantity_label = tk.Label(item_frame, text="1")
+            item_quantity_label.grid(row=0, column=1, sticky="nws")
+            self.order_items[name] = item_quantity_label
         
 
 if __name__ == '__main__':
