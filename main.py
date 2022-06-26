@@ -90,12 +90,12 @@ class CafeInterface:
         clear_button_frame.grid(row=0, column=1, sticky="news", padx=10, pady=10)
         tk.Label(clear_button_frame, text="CLEAR").grid(row=0, column=0)
 
-        order_list_frame = tk.Frame(sidebar_frame, background="lightgray")
+        order_list_frame = tk.Frame(sidebar_frame, background="#FBFAFA")
         order_list_frame.grid_columnconfigure(0, weight=1)
         order_list_frame.grid_rowconfigure(0, weight=1)
-        order_list_frame.grid(row=1, column=0, sticky="news")
+        order_list_frame.grid(row=1, column=0, sticky="news", padx=10)
 
-        canvas = tk.Canvas(order_list_frame, background="lightgray", highlightthickness=0)
+        canvas = tk.Canvas(order_list_frame, background="#FBFAFA", highlightthickness=0)
         # TODO: theme the scrollbar,
         # see: https://stackoverflow.com/questions/28375591/changing-the-appearance-of-a-scrollbar-in-tkinter-using-ttk-styles
         scrollbar = tk.Scrollbar(order_list_frame, orient="vertical", command=canvas.yview)
@@ -103,7 +103,7 @@ class CafeInterface:
 
         self.order_list_frame = tk.Frame(
             #sidebar_frame
-            canvas, background="lightgray")
+            canvas, background="#FBFAFA")
         self.order_list_frame.grid_columnconfigure(0, weight=1)
         # self.order_list_frame.grid(row=1, column=0, sticky='news')
         self.order_list_frame.bind(
@@ -139,8 +139,6 @@ class CafeInterface:
         checkout_button_frame.grid(row=3, column=0, sticky="news", padx=10, pady=10)
         tk.Label(checkout_button_frame, text="CHECKOUT", font=header_font).grid(row=0, column=0)
 
-
-
     def add_to_order(self, name, info):
         item_quantity_label = self.order_items.get(name)
         if item_quantity_label != None:
@@ -152,7 +150,7 @@ class CafeInterface:
             if self.color_counter == len(COLORS):
                 self.color_counter = 0
             item_frame.grid_columnconfigure(0, weight=1)
-            item_frame.grid(sticky="news", pady=(0, 5), padx=5)
+            item_frame.grid(sticky="news")
             item_label = tk.Label(item_frame, text=name, background=color)
             item_label.grid(row=0, column=0, sticky="nws")
             item_quantity_label = tk.Label(item_frame, text="1", background=color)
