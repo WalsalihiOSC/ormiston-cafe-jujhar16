@@ -1,6 +1,9 @@
 import json
+import subprocess
+import time
 import tkinter as tk
 import tkinter.font
+import PIL as pil
 
 from widgets import MenuWidget
 
@@ -165,6 +168,35 @@ class CafeInterface:
         checkout_button_frame = tk.Frame(sidebar_frame, highlightbackground="black", highlightthickness=1)
         checkout_button_frame.grid_rowconfigure(0, weight=1)
         checkout_button_frame.grid_columnconfigure(0, weight=1)
+        checkout_button_frame.entered = False
+        def checkout_on_click():
+            if checkout_button_frame.entered:
+                checkout_popup = tk.Toplevel(root)
+                x = root.winfo_x()
+                y = root.winfo_y()
+                rw = root.winfo_width()
+                rh = root.winfo_height()
+                w = 200
+                h = 200
+                checkout_popup.geometry("%dx%d+%d+%d" % (w, h, (x + rw/2) - (w/2), (y + rh/2) - (w/2)))
+                checkout_popup.wait_visibility()
+                checkout_popup.wm_attributes("-topmost", 1)
+                button1_event = root.bind("<Button-1>", lambda _: "break", add="+")
+                enter_event = root.bind("<Enter>", lambda _: "break", add="+")
+                focusin_event = root.bind("<FocusIn>", lambda _: checkout_popup.focus_set(), add="+")
+
+                def unbind_events(_):
+                    root.unbind("<Button-1>", button1_event)
+                    root.unbind("<Enter>", enter_event)
+                    root.unbind("<FocusIn>", focusin_event)
+                checkout_popup.bind('<Destroy>', unbind_events)
+        def checkout_on_enter():
+            checkout_button_frame.entered = True
+        def checkout_on_leave():
+            checkout_button_frame.entered = False
+        checkout_button_frame.bind("<Enter>", lambda _: checkout_on_enter())
+        checkout_button_frame.bind("<Leave>", lambda _: checkout_on_leave())
+        checkout_button_frame.bind_all('<Button-1>', lambda _: checkout_on_click(), add="+")
         checkout_button_frame.grid(row=3, column=0, sticky="news", padx=10, pady=10)
         tk.Label(checkout_button_frame, text="CHECKOUT", font=header_font).grid(row=0, column=0)
 
@@ -185,7 +217,9 @@ class CafeInterface:
             item_label.grid(row=0, column=0, sticky="w")
             tk.Label(item_frame, text=info["description"], background=color).grid(row=0, column=1, sticky="e")
             tk.Label(item_frame, text="${:,.2f}".format(info["price"]), background=color).grid(row=1, column=0, sticky="w")
-            item_quantity_label = tk.Label(item_frame, text="1", background=color)
+            # TODO: remove spacing above and below using canvas,
+            # see: https://stackoverflow.com/questions/57481581/how-to-remove-vertical-padding-of-label-in-tkinter-completely
+            item_quantity_label = tk.Label(item_frame, text="1", background="lightgray")
             item_quantity_label.grid(row=1, column=1, sticky="e")
             self.order_items[name] = item_quantity_label
         
