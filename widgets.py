@@ -37,6 +37,7 @@ class MenuWidget(Frame):
         # grid_remove or grid_forget instead of destroy
         for child in self.winfo_children():
             child.destroy()
+        # TODO: sort items alphabetically
         for index, (item_name, item_info) in enumerate(self.data[self.selected_tab].items()):
             item_row = int(index/self.column_count)
             item_column = int(index%self.column_count)

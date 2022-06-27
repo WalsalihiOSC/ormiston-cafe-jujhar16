@@ -39,7 +39,7 @@ class CafeInterface:
         content_frame.grid_columnconfigure(0, weight=1)
         content_frame.grid(row=0, column=0, sticky='news')
 
-        # We create the menu widget before tabs in case the data fails to load
+        # Create the menu widget before tabs in case the data fails to load
         menu = MenuWidget(content_frame, file_path="./menu.json",
             column_count=MENU_COLUMN_COUNT, selected_tab=DEFAULT_TAB,
             on_item_click=lambda name, info: self.add_to_order(name, info))
@@ -99,6 +99,19 @@ class CafeInterface:
         clear_button_frame = tk.Frame(sidebar_header_frame, highlightbackground="black", highlightthickness=1)
         clear_button_frame.grid_rowconfigure(0, weight=1)
         clear_button_frame.grid_columnconfigure(0, weight=1)
+        clear_button_frame.entered = False
+        def clear_on_click():
+            if clear_button_frame.entered:
+                self.order_items.clear()
+                for child in self.order_list_frame.winfo_children():
+                    child.destroy()
+        def clear_on_enter():
+            clear_button_frame.entered = True
+        def clear_on_leave():
+            clear_button_frame.entered = False
+        clear_button_frame.bind("<Enter>", lambda _: clear_on_enter())
+        clear_button_frame.bind("<Leave>", lambda _: clear_on_leave())
+        clear_button_frame.bind_all('<Button-1>', lambda _: clear_on_click(), add="+")
         clear_button_frame.grid(row=0, column=1, sticky="news", padx=10, pady=10)
         tk.Label(clear_button_frame, text="CLEAR").grid(row=0, column=0)
 
@@ -136,9 +149,13 @@ class CafeInterface:
         canvas.bind("<Leave>", c_on_leave)
         # TODO: this only works on macos, for windows & linux support,
         # see: https://stackoverflow.com/questions/17355902/tkinter-binding-mousewheel-to-scrollbar
-        def on_scroll(event):
+        def on_scroll(event):                
             if canvas.entered:
-                canvas.yview_scroll(-event.delta, "units")
+                if (event.state & 0x1) != 0:
+                    # TODO: test
+                    canvas.xview_scroll(-event.delta, "units")
+                else:
+                    canvas.yview_scroll(-event.delta, "units")
         canvas.bind_all("<MouseWheel>", on_scroll)
         frame_id = canvas.create_window((0, 0), window=self.order_list_frame, anchor="nw")
         canvas.bind("<Configure>", lambda e: canvas.itemconfig(frame_id, width=e.width))
