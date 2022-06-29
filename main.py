@@ -217,11 +217,57 @@ class CafeInterface:
             item_label.grid(row=0, column=0, sticky="w")
             tk.Label(item_frame, text=info["description"], background=color).grid(row=0, column=1, sticky="e")
             tk.Label(item_frame, text="${:,.2f}".format(info["price"]), background=color).grid(row=1, column=0, sticky="w")
+            item_quantity_frame = tk.Frame(item_frame, background=color)
+            item_quantity_frame.grid(row=1, column=1, sticky="e")
+
             # TODO: remove spacing above and below using canvas,
             # see: https://stackoverflow.com/questions/57481581/how-to-remove-vertical-padding-of-label-in-tkinter-completely
-            item_quantity_label = tk.Label(item_frame, text="1", background="lightgray")
-            item_quantity_label.grid(row=1, column=1, sticky="e")
+            # TODO: use SF Mono font and make label 3 chars wide minimum
+            item_quantity_label = tk.Label(item_quantity_frame, text="1", background="lightgray")
+            item_quantity_label.grid(row=0, column=1, sticky="e")
             self.order_items[name] = item_quantity_label
+
+            # TODO: disable/gray-out `-` button when quantity == 0
+            quantity_sub_button_frame = tk.Frame(item_quantity_frame, highlightbackground="black", highlightthickness=1)
+            quantity_sub_button_frame.grid_rowconfigure(0, weight=1)
+            quantity_sub_button_frame.grid_columnconfigure(0, weight=1)
+            quantity_sub_button_frame.entered = False
+            def sub_on_click(quantity_sub_button_frame, item_quantity_label, item_frame):
+                if quantity_sub_button_frame.entered:
+                    quantity = max(int(item_quantity_label["text"]) - 1, 0)
+                    if quantity == 0:
+                        # We use a global binding for clicking and the <Leave> event isnt called after this point,
+                        # so we need to make sure `entered` is set to False
+                        quantity_sub_button_frame.entered = False
+                        item_frame.destroy()
+                    else:
+                        item_quantity_label["text"] = quantity
+            def sub_on_enter(quantity_sub_button_frame):
+                quantity_sub_button_frame.entered = True
+            def sub_on_leave(quantity_sub_button_frame):
+                quantity_sub_button_frame.entered = False
+            quantity_sub_button_frame.bind("<Enter>", lambda _, quantity_sub_button_frame=quantity_sub_button_frame: sub_on_enter(quantity_sub_button_frame))
+            quantity_sub_button_frame.bind("<Leave>", lambda _, quantity_sub_button_frame=quantity_sub_button_frame: sub_on_leave(quantity_sub_button_frame))
+            quantity_sub_button_frame.bind_all('<Button-1>', lambda _, quantity_sub_button_frame=quantity_sub_button_frame, item_quantity_label=item_quantity_label, item_frame=item_frame: sub_on_click(quantity_sub_button_frame, item_quantity_label, item_frame), add="+")
+            quantity_sub_button_frame.grid(row=0, column=0)
+            tk.Label(quantity_sub_button_frame, text="-").grid(row=0, column=0)
+
+            quantity_add_button_frame = tk.Frame(item_quantity_frame, highlightbackground="black", highlightthickness=1)
+            quantity_add_button_frame.grid_rowconfigure(0, weight=1)
+            quantity_add_button_frame.grid_columnconfigure(0, weight=1)
+            quantity_add_button_frame.entered = False
+            def add_on_click(quantity_add_button_frame, item_quantity_label):
+                if quantity_add_button_frame.entered:
+                    item_quantity_label["text"] = int(item_quantity_label["text"]) + 1
+            def add_on_enter(quantity_add_button_frame):
+                quantity_add_button_frame.entered = True
+            def add_on_leave(quantity_add_button_frame):
+                quantity_add_button_frame.entered = False
+            quantity_add_button_frame.bind("<Enter>", lambda _, quantity_add_button_frame=quantity_add_button_frame: add_on_enter(quantity_add_button_frame))
+            quantity_add_button_frame.bind("<Leave>", lambda _, quantity_add_button_frame=quantity_add_button_frame: add_on_leave(quantity_add_button_frame))
+            quantity_add_button_frame.bind_all('<Button-1>', lambda _, quantity_add_button_frame=quantity_add_button_frame, item_quantity_label=item_quantity_label: add_on_click(quantity_add_button_frame, item_quantity_label), add="+")
+            quantity_add_button_frame.grid(row=0, column=2)
+            tk.Label(quantity_add_button_frame, text="+").grid(row=0, column=0)
         
 
 if __name__ == '__main__':
